@@ -173,25 +173,43 @@ class Game (GameWindow):
             pygame.time.wait(500)
             texts.clear(self.screen, self.background)
             
-    
+
+    def handlePaddle (self):
+        """Moves the paddle based on the input from the arrow keys"""
+        keystate = pygame.key.get_pressed()
+        self.paddle.move(keystate[K_RIGHT] - keystate[K_LEFT])        
+
         
     ###############################
     # Victory/Loss Methods
     ###############################
-    """Checks for loss conditions  (lives gone)"""
+
     def lost(self):
+        """Checks for loss conditions  (lives gone)"""
         return (self.lives == 0)  
 
     def won (self):
+        """Checks for victory conditions  (lives gone)"""
         return not self.blocks.sprites
 
+    def gameOver (self):
+        """Checks for end game conditions and handles them appropriately"""
+        lost = self.lost()
+        won = self.won()
+        if lost:
+            self.handleLoss()
+        elif won:
+            self.handleWin()
+        return lost or won
+        
     def handleLoss(self):
-        self.gameover(self.messages['loss'])
+        self.do_gameover(self.messages['loss'])
 
     def handleWin(self):
-        self.gameover(self.messages['win'])
+        self.do_gameover(self.messages['win'])
 
-    def gameover (self, msg):
+    def do_gameover (self, msg):
+        """Displays MSG below the rtnToMain message on the screen"""
         self.gameover = True
         self.ball.kill()
         winLossTxt = Text(msg) 
@@ -203,11 +221,18 @@ class Game (GameWindow):
         winLossTxt.positionBelow (rtnText)
         texts.draw(self.screen)
         pygame.display.flip()
-    """Returns a string represent the current state of the game--direction of 
-       the ball, etc"""
+
+
+####################################################
+# Debug methods
+####################################################        
 
     def __str__ (self):
-        
+        """
+        Returns a string representing the current state of the game--direction of 
+        the ball, etc
+        """
+
         return \
 "Ball: dir = %(ballD)s, pos = %(ballP)s \n\
 Paddle: pos = %(paddleP)s" % \
@@ -217,83 +242,82 @@ Paddle: pos = %(paddleP)s" % \
              }
 
 
+#################################################
+# Screen Drawing Methods
+#################################################
+
+    def redrawScreen (self):
+        dirty = self.all.draw(self.screen)
+        pygame.display.update(dirty)
+
+    def clearScreen (self):
+        self.all.clear (self.screen, self.background)
+
+
+#################################################
+# Game loops
+#################################################
+
     def gameLoop(self, *args):
-                
+        """Runs the main game"""
         while True:
-            #Handle events
+
             for event in pygame.event.get():
                 if event.type == QUIT:
                     #Repost for outer loop to catch
                     pygame.event.post(pygame.event.Event(QUIT))
-                    return
-                
+                    return                
                 elif event.type == BALLDROP:
                     self.handleDrop()
 
-                        #Check for game over:
-            if self.lost():
-                self.handleLoss()
-                break
-                
-            elif self.won():
-                self.handleWin()
-                break
-
-            keystate = pygame.key.get_pressed()
-              
-            #Clear previously drawn sprites 
-            self.all.clear(self.screen, self.background)
-
-            #Handle collisions
+            if self.gameOver():
+                self.endGameLoop()
+                return
+                                        
+            self.clearScreen()
+            
             self.handleCollisions()
-            #Update sprites                                       
-            self.all.update()
             
-            #Move paddle
-            self.paddle.move(keystate[K_RIGHT] - keystate[K_LEFT])
-
-            #Redraw screen
-            
-            dirty = self.all.draw(self.screen)
-            pygame.display.update(dirty)
-       
+            self.all.update()            
+            self.handlePaddle()
+            self.redrawScreen()       
             self.clock.tick(40)
 
-        #Endgame handling
-        while True:
-            
+
+
+    def endGameLoop(self):
+        """Loop until the user presses a key"""
+        while True:            
              #Handle events
             for event in pygame.event.get():
                 if event.type == QUIT:
                     #Repost for outer loop
                     pygame.event.post(pygame.event.Event(QUIT))
                     return
-
                 elif event.type == KEYDOWN:
                     debugPrint("Exited game")
                     return
-                
-            
+                            
             self.clock.tick(40)
-
 
 
 ##########################################
 # Script bits (option parsing and the like
 
-def initParser (parser):
-    parser.set_defaults(debug=False, logFile=None)
+def initParser ():
+    parser = OptionParser()
+    parser.set_defaults(debug=True, logFile=None)
     parser.add_option ("-d", action="store_true", dest="debug",\
                      help = "Causes program to be run in debug mode")
     parser.add_option ("-l", action="store", dest="logFile",\
                      help = "Causes debug messages to be logged")
-
+    
+    return parser
    
 def main():
     
     #Do option parsing
-    parser = OptionParser()
-    initParser(parser)
+    parser = initParser()
     options, args = parser.parse_args()
     Helpers.debug = options.debug
     Helpers.logFile = options.logFile
@@ -305,6 +329,7 @@ def main():
         level = "basic"
                       
     MainGame(level).gameLoop()
+    
     pygame.quit()
     sys.exit(0)
 

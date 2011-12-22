@@ -4,6 +4,7 @@ import textwrap
 from Blocks import *
 import xml.dom.minidom as xml
 import Helpers
+
 """Contains utilities for loading levels (in xml format)"""
 
 class Level:
@@ -58,8 +59,7 @@ class Level:
 
 def load_level (level_name):
     try:
-        return Level(level_name)
-        
+        return Level(level_name)        
     except Exception as e:
         raise LevelLoadingException (e.msg, level_name)
 
@@ -76,6 +76,7 @@ class LevelLoadingException(Exception):
         self.level_name = level_name
 ######################################
 # xml Helpers
+
 """Extracts the attributes of element and puts them into a dictionary"""
 def elementToDict(element):
     rtnDict = {}
