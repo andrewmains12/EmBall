@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<level lives="4">
+  <block color="blue">
+    This is my block
+  </block>
+
+  <block color="red">
+    Other block
+  </block>
+</level>
