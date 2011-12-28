@@ -308,12 +308,14 @@ Paddle: pos = %(paddleP)s" % \
 # Script bits (option parsing and the like
 
 def initParser ():
+    usage = "usage: ./Emball.py [options] [level_name]"
     parser = OptionParser()
     parser.set_defaults(debug=True, logFile=getLogName())
     parser.add_option ("-d", action="store_true", dest="debug",\
                      help = "Causes program to be run in debug mode")
     parser.add_option ("-l", action="store", dest="logFile",\
                      help = "Causes debug messages to be logged")
+    parser.add_option
     
     return parser
    
