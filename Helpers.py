@@ -2,21 +2,23 @@ from __future__ import division
 import os
 import sys
 import pygame
+
 import math
+import time
 
 """This module provides a suite of utilitarian functions to perform tasks such
 as loading images etc"""
-main_dir = os.path.split(os.path.abspath(__file__))[0]
+MAIN_DIR = os.path.split(os.path.abspath(__file__))[0]
 
 #Debug constants
-log_dir = os.path.join(main_dir, "log")
+LOG_DIR = os.path.join(MAIN_DIR, "log")
 
 
 #Image Utilities
 
-img_dir = os.path.join(main_dir, "Images")
+IMG_DIR = os.path.join(MAIN_DIR, "Images")
 
-ImgFiles = {"ball" :  "ball.png",
+IMG_FILES = {"ball" :  "ball.png",
             "paddle" : "paddle.png",
             "blue" : "Blocks/blue.png",
             "red"  : "Blocks/red.png",
@@ -28,13 +30,13 @@ ImgFiles = {"ball" :  "ball.png",
 #File helpers:
 
 def get_path_for_level(levelName):
-    levelsDir = os.path.join(main_dir, "Levels")
+    levelsDir = os.path.join(MAIN_DIR, "Levels")
     path = os.path.join(levelsDir, levelName)
     return path
 
 def load_image(imgName):
     "loads an image, prepares it for play"
-    f = os.path.join(img_dir, ImgFiles[imgName])
+    f = os.path.join(IMG_DIR, IMG_FILES[imgName])
 
     try:
         surface = pygame.image.load(f)
@@ -54,7 +56,7 @@ class dummysound:
 
 def load_sound(file):
     if not pygame.mixer: return dummysound()
-    file = os.path.join(main_dir, 'data', file)
+    file = os.path.join(MAIN_DIR, 'data', file)
     try:
         sound = pygame.mixer.Sound(file)
         return sound
@@ -94,11 +96,27 @@ def normalize (vector):
 ###########
 # Debug Functions
 #############
-def debugPrint(x):
+def debugPrint(x, debug_level=0):
     if debug:
         print (x)
-
+    
     if logFile != None:
-        with open(os.path.join(log_dir, logFile), 'w') as f: 
+        with open(os.path.join(LOG_DIR, logFile), 'w') as f: 
                 f.write(str(x) + '\n')
             
+def getLogName ():
+    """Returns a name for a new log file (in the log directory"""
+
+    return os.path.join (LOG_DIR, time.strftime("%H:%M-%m-%Y"))
+
+def isConsoleEscape (event):
+    """
+    Returns true iff EVENT represents the escape sequence for the console (ctrl-c)
+    """
+    ctrl_pressed = pygame.key.get_mods() & pygame.locals.KMOD_CTRL
+
+    return ctrl_pressed and \
+           event.type == pygame.locals.KEYDOWN and\
+           event.key == pygame.locals.K_c
+    
+    

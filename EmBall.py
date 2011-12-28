@@ -21,7 +21,8 @@ from EmBallConstants import *
 
 
 class GameWindow (object):
-    """Defines an EmBall window with a screen, clock, etc. 
+    """
+    Defines an EmBall window with a screen, clock, etc. 
     
     Each GameWindow subclass should implement gameLoop, which is responsible for 
     events handling and the like
@@ -49,8 +50,8 @@ class GameWindow (object):
             self.clock  = enclosing_game_window.clock
             self.enclosing_game_window = enclosing_game_window
 
-"""Game loop for mainscreen"""
 class MainGame(GameWindow):
+    """Game loop for mainscreen"""
     
     def __init__ (self, startLevel):
         super(MainGame, self).__init__()
@@ -76,7 +77,7 @@ class MainGame(GameWindow):
 
     def gameLoop(self):
         while True:
-                        #Handle events
+            #Handle events
             for event in pygame.event.get():
                 if event.type == QUIT:
                     return
@@ -90,11 +91,7 @@ class MainGame(GameWindow):
                         self.game.gameLoop()
                         self.all.clear(self.screen, self.background)
                         self.drawTitleScreen()
-        
-            
-            
-        #Redraw screen
-            
+                                                            
             self.clock.tick(80)
 
     def drawTitleScreen(self):
@@ -102,14 +99,17 @@ class MainGame(GameWindow):
         self.screen.blit(self.background, (0,0)) 
         pygame.display.flip()
 
-"""Game loop for pyball game--runs gameplay"""
+
 class Game (GameWindow):
+    """
+    Main game loop for EmBall--handles display and all of the game objects 
+    needed for the game.
+    """
     def __init__(self, levelName, maingame):
         super(Game, self).__init__(enclosing_game_window=maingame)
         #Assign game constants
         self.lives = LIVES
         self.score = SCORE
-
 
         #Init groups
         self.all = pygame.sprite.RenderUpdates()
@@ -174,7 +174,7 @@ class Game (GameWindow):
             texts.clear(self.screen, self.background)
             
 
-    def handlePaddle (self):
+    def movePaddle (self):
         """Moves the paddle based on the input from the arrow keys"""
         keystate = pygame.key.get_pressed()
         self.paddle.move(keystate[K_RIGHT] - keystate[K_LEFT])        
@@ -186,21 +186,22 @@ class Game (GameWindow):
 
     def lost(self):
         """Checks for loss conditions  (lives gone)"""
-        return (self.lives == 0)  
+        return self.lives <= 0
 
     def won (self):
-        """Checks for victory conditions  (lives gone)"""
-        return not self.blocks.sprites
+        """Checks for victory conditions  (blocks gone)"""
+        return not self.blocks.sprites()
 
     def gameOver (self):
         """Checks for end game conditions and handles them appropriately"""
-        lost = self.lost()
-        won = self.won()
-        if lost:
+        if self.lost():
             self.handleLoss()
-        elif won:
+            return True
+        elif self.won():
             self.handleWin()
-        return lost or won
+            return True
+        else:
+            return False
         
     def handleLoss(self):
         self.do_gameover(self.messages['loss'])
@@ -237,8 +238,8 @@ class Game (GameWindow):
 "Ball: dir = %(ballD)s, pos = %(ballP)s \n\
 Paddle: pos = %(paddleP)s" % \
             {'ballD' : str(self.ball.direction), \
-             'ballP' : str(self.ball.rect.center), \
-             'paddleP' : str(self.paddle.rect.center) \
+                 'ballP' : str(self.ball.rect.center), \
+                 'paddleP' : str(self.paddle.rect.center) \
              }
 
 
@@ -260,8 +261,8 @@ Paddle: pos = %(paddleP)s" % \
 
     def gameLoop(self, *args):
         """Runs the main game"""
+        
         while True:
-
             for event in pygame.event.get():
                 if event.type == QUIT:
                     #Repost for outer loop to catch
@@ -270,20 +271,22 @@ Paddle: pos = %(paddleP)s" % \
                 elif event.type == BALLDROP:
                     self.handleDrop()
 
+                #Ctrl-C
+                elif isConsoleEscape (event):
+                    import pdb; pdb.set_trace()
+#                    self.console()
+
             if self.gameOver():
                 self.endGameLoop()
                 return
                                         
             self.clearScreen()
-            
-            self.handleCollisions()
-            
+
+            self.handleCollisions()            
             self.all.update()            
-            self.handlePaddle()
+            self.movePaddle()
             self.redrawScreen()       
             self.clock.tick(40)
-
-
 
     def endGameLoop(self):
         """Loop until the user presses a key"""
@@ -306,7 +309,7 @@ Paddle: pos = %(paddleP)s" % \
 
 def initParser ():
     parser = OptionParser()
-    parser.set_defaults(debug=True, logFile=None)
+    parser.set_defaults(debug=True, logFile=getLogName())
     parser.add_option ("-d", action="store_true", dest="debug",\
                      help = "Causes program to be run in debug mode")
     parser.add_option ("-l", action="store", dest="logFile",\

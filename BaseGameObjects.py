@@ -6,18 +6,20 @@ from pygame.locals import *
 import Helpers
 from Helpers import *
 from EmBallConstants import *    
+
 """Provides base classes for the main game objects, paddles, blocks and
 balls. These classes can be subclassed to make specific types of each"""
 
 
 class GameObject(pygame.sprite.Sprite):
     
-    """Tests whether top of sprite is colliding with rect"""
+
     def topCollision (self, rect):
+        """Tests whether top of sprite is colliding with rect"""
         for x in range(self.rect.left, self.rect.right, COLLISIONSTEP):
             if rect.collidepoint((x, self.rect.top)):
                 return True
-#        return rect.collidepoint(self.rect.midbottom)
+
         return False
 
     """Tests whether bottom side of sprite is colliding with rect"""
@@ -27,7 +29,7 @@ class GameObject(pygame.sprite.Sprite):
                 return True
         
         return False
-#        return rect.collidepoint(self.rect.midbottom)
+
     
     """Tests whether left side of sprite is colliding with rect"""
     def leftCollision(self, rect):
@@ -36,11 +38,11 @@ class GameObject(pygame.sprite.Sprite):
                 return True
 
         return False
-#        rect.collidepoint(self.rect.midleft)
+
     
-    """Tests whether right side of sprite is colliding with rect"""
-    def rightCollision(self, rect):
-        
+
+    def rightCollision(self, rect):        
+        """Tests whether right side of sprite is colliding with rect"""
         for y in range(self.rect.top, self.rect.bottom, COLLISIONSTEP):
             if rect.collidepoint((self.rect.right, y)):
                 return True
@@ -72,15 +74,16 @@ class Ball(GameObject):
         xDir, yDir = self.direction
         
         if block.leftCollision(self.rect) or block.rightCollision(self.rect):
-            xDir = -xDir
-        
+            xDir = -xDir        
         if block.topCollision(self.rect) or block.bottomCollision(self.rect):
             yDir = -yDir
 
         self.direction = xDir, yDir
-    """Simulates a reflection off the walls of the game. Collisions are elastic
-    """
+
     def wallbounce(self):
+        """
+        Simulates a reflection off the walls of the game. Collisions are elastic
+        """
 
         xDir, yDir = self.direction
         #Bounce off of side walls
@@ -94,13 +97,12 @@ class Ball(GameObject):
     
         self.direction = xDir, yDir
 
-    """Get new direction after bounce off of paddle. Direction is determined by
-       position the ball hits on the paddle relative to the center.
-       
-       Args:
-           paddle: the paddle
-    """
     def paddleBounce(self, paddle):
+        """
+        Get new direction after bounce off of paddle. Direction is determined by
+        position the ball hits on the paddle relative to the center.       
+        """
+
         xDir,yDir = self.direction
         
         # Vertical collision
@@ -111,7 +113,6 @@ class Ball(GameObject):
 
             xDir = percentOffset * PADDLEDEFLECT
             
-
        # Horizontal Collision
         elif paddle.leftCollision(self.rect) \
                 or paddle.rightCollision(self.rect):
@@ -131,14 +132,14 @@ class Ball(GameObject):
 
         self.wallbounce()
         xDir, yDir = self.direction
-        xSpeed, ySpeed = self.speed
-        
+        xSpeed, ySpeed = self.speed        
         self.rect.move_ip(xDir * xSpeed, yDir * ySpeed)
         
 
-class Paddle(GameObject):
-    #Needs containers to be defined outside to succeed
+class Paddle (GameObject):
+
     def __init__ (self):
+        """Precondition: Paddle.containers must be defined"""
         try:
             pygame.sprite.Sprite.__init__(self, self.containers)
         except AttributeError:
@@ -177,7 +178,10 @@ class Paddle(GameObject):
 #####################################################
 
 class BaseBlock(GameObject):
-    """Color is a string arg describing the color of the brick to use"""
+    """
+    The base class for all block objects in the game. Various attributes are meant
+    to be overridden by subclasses to do different, more interesting things.
+    """
     containers = []
 
     def __init__ (self, **blockAttrs):
@@ -228,3 +232,5 @@ class Text(GameObject):
 
 class Button (Text):
     pass
+
+

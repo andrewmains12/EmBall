@@ -3,7 +3,7 @@ For the definition of BaseBlock, the interface for all block types, see
 BaseGameObjects.py"""
 
 from BaseGameObjects import BaseBlock
-from Helpers import ImgFiles
+from Helpers import IMG_FILES
 
 class Basic(BaseBlock):
     
@@ -17,8 +17,11 @@ class UnbreakableBlock (BaseBlock):
         super(UnbreakableBlock, self).__init__ (**blockAttrs)
 
 
+
 ########################
 #Helpers
+########################
+
 blockTypes = {'unbreakable' : UnbreakableBlock, 
               'basic' : Basic
               }
