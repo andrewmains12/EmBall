@@ -1,3 +1,6 @@
+"""Provides base classes for the main game objects, paddles, blocks and
+balls. These classes can be subclassed to make specific types of each"""
+
 from __future__ import division
 import pygame
 from pygame.locals import *
@@ -7,13 +10,22 @@ import Helpers
 from Helpers import *
 from EmBallConstants import *    
 
-"""Provides base classes for the main game objects, paddles, blocks and
-balls. These classes can be subclassed to make specific types of each"""
 
 
 class GameObject(pygame.sprite.Sprite):
+    """Base object """
     
+    containers = None
+    def __init__ (self):
+        if self.containers is None:    
+            raise InitializationError \
+              ("Game object initialized without self.containers being defined")        
 
+        self.rect = None
+        pygame.sprite.Sprite.__init__(self, self.containers)
+        
+
+    
     def topCollision (self, rect):
         """Tests whether top of sprite is colliding with rect"""
         for x in range(self.rect.left, self.rect.right, COLLISIONSTEP):
@@ -22,8 +34,9 @@ class GameObject(pygame.sprite.Sprite):
 
         return False
 
-    """Tests whether bottom side of sprite is colliding with rect"""
+
     def bottomCollision (self, rect):
+        """Tests whether bottom side of sprite is colliding with rect"""
         for x in range(self.rect.left, self.rect.right, COLLISIONSTEP):
             if rect.collidepoint((x, self.rect.bottom)):
                 return True
@@ -31,8 +44,9 @@ class GameObject(pygame.sprite.Sprite):
         return False
 
     
-    """Tests whether left side of sprite is colliding with rect"""
+
     def leftCollision(self, rect):
+        """Tests whether left side of sprite is colliding with rect"""
         for y in range(self.rect.top, self.rect.bottom, COLLISIONSTEP):
             if rect.collidepoint((self.rect.left, y)):
                 return True
@@ -54,14 +68,10 @@ class Ball(GameObject):
     images = []
     
     def __init__(self):       
-        try:
-            pygame.sprite.Sprite.__init__(self, self.containers)
-        except AttributeError:
-            raise InitializationError \
-              ("Game object initialized without self.containers being defined")
+        GameObject.__init__ (self)
        
         if Ball.images == []:
-            Ball.images.append(Helpers.load_image("ball"))
+            Ball.images.append(Helpers.load_builtin_image("ball"))
         
         self.image = self.images[0]
         self.rect = self.image.get_rect()
@@ -146,7 +156,7 @@ class Paddle (GameObject):
             raise InitializationError \
               ("Game object initialized without self.containers being defined")
         
-        self.image = Helpers.load_image("paddle")
+        self.image = Helpers.load_builtin_image("paddle")
         self.rect = self.image.get_rect()
         #Set rect to extend to bottom of screen
 #        self.rect.
@@ -185,14 +195,11 @@ class BaseBlock(GameObject):
     containers = []
 
     def __init__ (self, **blockAttrs):
-        #try:
-        pygame.sprite.Sprite.__init__(self, self.containers)
-        #except AttributeError:
-         #   raise InitializationError \
-          #    ("Game object initialized without self.containers being defined")
+
+        GameObject.__init__(self)
         
         image_names = blockAttrs['image_names']
-        self.images = [Helpers.load_image(name) for name in image_names]
+        self.images = [Helpers.load_builtin_image(name) for name in image_names]
         self.image = self.images[0]
         self.rect = self.image.get_rect()
         self.rect.topleft = blockAttrs['position']
@@ -224,8 +231,9 @@ class Text(GameObject):
     #     surface.blit(self.image, pos)
     #     pygame.display.flip()
     
-    """Draws the given text on the line below this one onto the surface"""
+
     def positionBelow (self, txt):
+        """Draws the given text on the line below this one onto the surface"""
         x, y = self.rect.bottomleft
         txt.rect.topleft = x, y + self.fontsize / 5
     

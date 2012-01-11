@@ -5,45 +5,65 @@ import os
 
 from Blocks import *
 import xml.dom.minidom as xml
-from Helpers import get_path_for_level
+from Helpers import get_path_for_level, load_image
 
 
 class Level(object):
-    """Contains utilities for loading levels (in xml format)"""
-    def __init__ (self, lvl_path):
-        
-        self.name = os.path.basename(lvl_path)
-        self.path = lvl_path
+    """
+    Represents an EmBall level.        
+    """
 
-        #Set basic background
-        self.background = pygame.Surface(SCREENRECT.size)
-
-        #Special case to keep shit running--gone soon
-        if self.name == "basic":
-            self.get_basic()
-            return
-
-        #If lvl file already exists, 
-        if os.path.isfile(lvl_path):
-            self.parseFile(lvl_path)
-            
-        else:
-            #New level
-            self.background.fill((255,255,255))
+    def __init__ (self, lvl_path=None):
+        """Initialize a new level"""        
+        if not lvl_path:
             self.doc = xml.Document()
+            self.name = "Untitled"
             self.blocks = []
+            self.background = pygame.Surface(SCREENRECT.size)
+            self.background.fill((255,255,255))
+        else:
+            self.name = os.path.basename(lvl_path)
+            self.path = lvl_path
+
+            #Special case to keep shit running--gone soon
+            if self.name == "basic":
+                self.get_basic()
+                
+            else:
+                self.parseFile(lvl_path)        
 
 
+
+    @classmethod
+    def new_level (cls):
+        """Return a blank level with a default background""" 
+        
+        
     def parseFile (self, lvl_path): 
         self.doc = xml.parse(lvl_path)
         self.blocks = self.get_blocks_from_doc()
-        rgb = self.get_background_from_doc()
-        self.background.fill(rgb)
+        self.background = self.get_background_from_doc()
+        
 
     def get_background_from_doc (self):
-        rgb_str = d.documentElement.attributes["background"].value
-        return tuple((int(x) for x in rgb_str.split(",")))
+        """
+        Returns the background image for the level.  If a background
+        image is specified (by the "img" attribute on the background
+        node), returns a surface of this image, otherwise returns a
+        surface filled with the color specified by background.color
+        """
+        background_ele = find_child (self.doc, "background")
+        
+        if background_ele.hasAttribute ("img"):
+            img_path = background_ele.attributes["img"].value
+            return load_image (img_path)            
+        else:
+            rgb_str = background_ele.attributes["color"].value
+            rgb_val = tuple((int(x) for x in rgb_str.split(",")))
+            background = pygame.Surface(SCREENRECT.size)
+            background.fill (rgb_val)
 
+            return background
         
     def get_blocks_from_doc (self):
         """Creates block instances from this level's xml doc"""
@@ -52,7 +72,6 @@ class Level(object):
         blocks = [] 
         for ele in blockElements:
             blockAttrs = elementToDict (ele)
-            import pdb; pdb.set_trace()
             blockType = blockAttrs.get('type', "basic")
             blocks.append(get_block(blockType, **blockAttrs))
             
@@ -60,9 +79,6 @@ class Level(object):
                         
     #Deprecated, soon to kill
     def get_basic(self):
-        #Fill in white background
-        self.background.fill((255,255,255))
-
         blocks = []
         i = 0
         for y in range (0, 3*BLOCKSIZE[1], BLOCKSIZE[1]):
@@ -92,7 +108,7 @@ class Level(object):
 def load_level (level_name):
     #    try:
     level_path = get_path_for_level(level_name)
-    return Level(level_path)
+    return Level(lvl_path=level_path)
         
     #except Exception as e:
      #   raise LevelLoadingException (e.message, level_name)
@@ -126,3 +142,9 @@ def elementToDict(element):
 
     return rtnDict
         
+def find_child (element, child_name):
+    """Finds the immediate child of ELEMENT with CHILD_NAME"""
+    for child in element.childNodes:
+        if child.localName == child_name:
+            return child
+    return None

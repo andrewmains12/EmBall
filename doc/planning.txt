@@ -1,0 +1,7 @@
+Needs:
+
+	GameObject Class:
+		   
+		   update/move
+		   
+		   

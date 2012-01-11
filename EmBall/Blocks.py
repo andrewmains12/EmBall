@@ -2,19 +2,19 @@
 For the definition of BaseBlock, the interface for all block types, see
 BaseGameObjects.py"""
 
-from BaseGameObjects import BaseBlock
-from Helpers import IMG_FILES
+from game.BaseGameObjects import BaseBlock
+from game.Helpers import IMG_FILES
 
 class Basic(BaseBlock):
     
     def __init__ (self, **blockAttrs):
         blockAttrs['image_names'] = [blockAttrs['color']]
-        super(Basic, self).__init__ (**blockAttrs)
+        BaseBlock.__init__ (self, **blockAttrs)
 
 class UnbreakableBlock (BaseBlock):
     
     def __init__ (self, **blockAttrs):
-        super(UnbreakableBlock, self).__init__ (**blockAttrs)
+        BaseBlock.__init__ (self, **blockAttrs)
 
 
 
@@ -28,9 +28,9 @@ blockTypes = {'unbreakable' : UnbreakableBlock,
 
    
 def get_block(blockType, **blockAttrs):
-        if blockType in blockTypes:
-            #Instantiate an instance of that block type
-            return blockTypes[blockType] (**blockAttrs)
+    if blockType in blockTypes:
+        #Instantiate an instance of that block type
+        return blockTypes[blockType] (**blockAttrs)
 
-        else:
-            raise InitializationError("Bad block type: %s" % blockType)
+    else:
+        raise InitializationError("Bad block type: %s" % blockType)

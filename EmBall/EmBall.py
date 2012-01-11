@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
 from __future__ import division
-import os.path
 import sys
-import math
+print sys.path
+
 from optparse import OptionParser
 
 #Pygame imports
@@ -16,7 +16,6 @@ import Helpers
 from Helpers import *
 from BaseGameObjects import *
 from EmBallConstants import *    
-
 ########################
 
 
@@ -56,7 +55,7 @@ class MainGame(GameWindow):
     def __init__ (self, startLevel):
         super(MainGame, self).__init__()
         self.startLevel = startLevel
-        self.background = load_image("startBackground")
+        self.background = load_builtin_image("startBackground")
 
         #Init groups
         self.all = pygame.sprite.Group()
@@ -315,7 +314,6 @@ def initParser ():
                      help = "Causes program to be run in debug mode")
     parser.add_option ("-l", action="store", dest="logFile",\
                      help = "Causes debug messages to be logged")
-    parser.add_option
     
     return parser
    
@@ -324,9 +322,9 @@ def main():
     #Do option parsing
     parser = initParser()
     options, args = parser.parse_args()
-    Helpers.debug = options.debug
-    Helpers.logFile = options.logFile
-    
+    Helpers.DEBUG = options.debug
+    Helpers.LOG_FILE = options.logFile
+
     if len(args) != 0: 
         level = args[0]
 

@@ -1,19 +1,20 @@
+"""This module provides a suite of utilitarian functions to perform tasks such
+as loading images etc"""
+
 from __future__ import division
 import os
-import sys
 import pygame
 
 import math
 import time
 
-"""This module provides a suite of utilitarian functions to perform tasks such
-as loading images etc"""
 MAIN_DIR = os.path.split(os.path.abspath(__file__))[0]
 
 #Debug constants
+DEBUG = False
+
 LOG_DIR = os.path.join(MAIN_DIR, "log")
-
-
+LOG_FILE = None
 #Image Utilities
 
 IMG_DIR = os.path.join(MAIN_DIR, "Images")
@@ -26,7 +27,6 @@ IMG_FILES = {"ball" :  "ball.png",
             "startBackground" : "Backgrounds/bricks.png" 
 }
 
-
 #File helpers:
 
 def get_path_for_level(levelName):
@@ -34,35 +34,40 @@ def get_path_for_level(levelName):
     path = os.path.join(levelsDir, levelName)
     return path
 
-def load_image(imgName):
-    "loads an image, prepares it for play"
-    f = os.path.join(IMG_DIR, IMG_FILES[imgName])
+def load_builtin_image(imgName):
+    """Loads an image registered with the IMG_FILES dictionary"""
+    if imgName not in IMG_FILES:
+        raise KeyError ("%s is not a builtin image--\
+see Helpers.IMG_FILES for valid arguments")
+    return load_image(os.path.join(IMG_DIR, IMG_FILES[imgName]))
 
+    
+def load_image (img_path):
     try:
-        surface = pygame.image.load(f)
+        surface = pygame.image.load(img_path)
     except pygame.error:
-        raise SystemExit('Could not load image "%s" %s'%(f, pygame.get_error()))
+        raise SystemExit('Could not load image "%s" %s'%
+                         (img_path, pygame.get_error()))
     return surface.convert()
 
+
 def load_images(*files):
-    imgs = []
-    for file in files:
-        imgs.append(load_image(file))
-    return imgs
+    return [load_builtin_image(f) for f in files]
 
+class DummySound:
+    def play(self):
+        pass
 
-class dummysound:
-    def play(self): pass
-
-def load_sound(file):
-    if not pygame.mixer: return dummysound()
-    file = os.path.join(MAIN_DIR, 'data', file)
+def load_sound(sound_file):
+    if not pygame.mixer:
+        return DummySound()
+    sound_file = os.path.join(MAIN_DIR, 'data', sound_file)
     try:
-        sound = pygame.mixer.Sound(file)
+        sound = pygame.mixer.Sound(sound_file)
         return sound
     except pygame.error:
-        print ('Warning, unable to load, %s' % file)
-    return dummysound()
+        print ('Warning, unable to load, %s' % sound_file)
+    return DummySound()
 
  
 
@@ -81,14 +86,13 @@ class InitializationError(EmBallError):
     
     """
     def __init__(self, reason):
+        super(InitializationError, self).__init__ (reason)
         self.reason = reason
 
 
-
 #Movement Helpers
-
-"""Takes in a vector represented as a tuple and returns a normalized vector"""    
 def normalize (vector):
+    """Takes in a vector represented as a tuple and returns a normalized vector"""    
     x,y = vector
     length = math.sqrt(x*x + y*y)
     return x / length, y / length
@@ -97,16 +101,15 @@ def normalize (vector):
 # Debug Functions
 #############
 def debugPrint(x, debug_level=0):
-    if debug:
+    if DEBUG:
         print (x)
     
-    if logFile != None:
-        with open(os.path.join(LOG_DIR, logFile), 'w') as f: 
-                f.write(str(x) + '\n')
+    if LOG_FILE != None:
+        with open(os.path.join(LOG_DIR, LOG_FILE), 'w') as f: 
+            f.write(str(x) + '\n')
             
 def getLogName ():
     """Returns a name for a new log file (in the log directory"""
-
     return os.path.join (LOG_DIR, time.strftime("%H:%M-%m-%Y"))
 
 def isConsoleEscape (event):
