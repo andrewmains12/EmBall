@@ -93,7 +93,7 @@ class Level(object):
                 if j % 2 == 0: color = "blue"
                 else:          color = "red"
     
-                blockAttrs = {'position' : (x,y),
+                blockAttrs = {'pos' : (x,y),
                               'image_names' : [color],
                               'color' : color
                               }
