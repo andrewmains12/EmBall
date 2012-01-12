@@ -3,7 +3,6 @@ For the definition of BaseBlock, the interface for all block types, see
 BaseGameObjects.py"""
 
 from BaseGameObjects import BaseBlock
-from Helpers import IMG_FILES
 
 class Basic(BaseBlock):
     
@@ -21,7 +20,6 @@ class UnbreakableBlock (BaseBlock):
 ########################
 #Helpers
 ########################
-
 blockTypes = {'unbreakable' : UnbreakableBlock, 
               'basic' : Basic
               }
@@ -33,4 +31,4 @@ def get_block(blockType, **blockAttrs):
         return blockTypes[blockType] (**blockAttrs)
 
     else:
-        raise InitializationError("Bad block type: %s" % blockType)
+        raise ValueError("Bad block type: %s" % blockType)

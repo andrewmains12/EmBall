@@ -35,20 +35,13 @@ class Level(object):
             else:
                 self.parseFile(lvl_path)        
 
-
-
-    @classmethod
-    def new_level (cls):
-        """Return a blank level with a default background""" 
-        
-        
+                
     def parseFile (self, lvl_path): 
-        self.doc = xml.parse(lvl_path)
-        
+        self.doc = xml.parse(lvl_path)        
         self.blocks = self.get_blocks_from_doc()
         self.background = self.get_background_from_doc()
         
-
+    
     def get_background_from_doc (self):
         """
         Returns the background image for the level.  If a background

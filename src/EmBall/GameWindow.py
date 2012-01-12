@@ -3,9 +3,6 @@
 from __future__ import division
 import sys
 
-
-from optparse import OptionParser
-
 #Pygame imports
 import pygame
 from pygame.locals import *
@@ -301,47 +298,6 @@ Paddle: pos = %(paddleP)s" % \
                     return
                             
             self.clock.tick(40)
-
-
-##########################################
-# Script bits (option parsing and the like
-
-def initParser ():
-    usage = "usage: ./Emball.py [options] [level_name]"
-    parser = OptionParser()
-    parser.set_defaults(debug=True, logFile=getLogName())
-    parser.add_option ("-d", action="store_true", dest="debug",\
-                     help = "Causes program to be run in debug mode")
-    parser.add_option ("-l", action="store", dest="logFile",\
-                     help = "Causes debug messages to be logged")
-    
-    return parser
-   
-def main():
-    
-    #Do option parsing
-    parser = initParser()
-    options, args = parser.parse_args()
-    Helpers.DEBUG = options.debug
-    Helpers.LOG_FILE = options.logFile
-
-    if len(args) != 0: 
-        level = args[0]
-
-    else: 
-        level = "basic"
-                      
-    MainGame(level).gameLoop()
-    
-    pygame.quit()
-    sys.exit(0)
-
-
-if __name__ == "__main__":
-    main()
-    
-
-
 
 
 

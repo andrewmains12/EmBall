@@ -207,7 +207,6 @@ class BaseBlock(GameObject):
     def hit(self):
         self.kill()
 
-
 ######################################
 
 class Text(GameObject):

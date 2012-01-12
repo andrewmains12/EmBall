@@ -5,7 +5,8 @@ import unittest
 from EmBall import Helpers
 
 from EmBall.level import Level, elementToDict, safe_decode_json
-import EmBall.level
+
+from MonkeyPatches import HelperPatch
 
 import xml.dom.minidom as xml
 
@@ -23,7 +24,9 @@ class LevelTest (unittest.TestCase):
         """
         Setup to initialize the level with our test xml. This xml would normally
         be read from a file, but we mock that aspect here with our string.
-        """
+        """        
+        #Monkey patch image loading 
+        Helpers.load_image = HelperPatch.load_image
         self.level = Level()
         self.level.doc = xml.parseString (self.TEST_LVL)
         self.block_attrs = [elementToDict (ele) 
@@ -36,14 +39,8 @@ class LevelTest (unittest.TestCase):
         for block, test_attrs in zip(blocks, self.block_attrs):
             self.assertEqual (list(block.rect.topleft), safe_decode_json(test_attrs["pos"]))
         
-    def test_background (self):
-        pass
-
 
     
-
 if __name__ == "__main__":
-    from MonkeyPatches import HelperPatch
-    Helpers.load_image = HelperPatch.load_image
     unittest.main()
     
