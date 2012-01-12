@@ -10,7 +10,7 @@ from setuptools import setup
 APP = ['EmBall.py']
 DATA_FILES = []
 OPTIONS = {'argv_emulation': True,
- 'packages': 'EmBall',
+ 'packages': 'emball',
  'resources': 'Images,doc,Levels'}
 
 setup(

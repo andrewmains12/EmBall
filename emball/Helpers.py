@@ -116,6 +116,7 @@ def debugPrint(x, debug_level=0):
         print (x)
     
     if LOG_FILE != None:
+        os.mkdir(LOG_DIR)
         with open(os.path.join(LOG_DIR, LOG_FILE), 'w') as f: 
             f.write(str(x) + '\n')
             
