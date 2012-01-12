@@ -1,0 +1,2 @@
+#Script to run emball
+python src/EmBall/EmBall.py
