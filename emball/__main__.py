@@ -1,8 +1,8 @@
 
-import Helpers
-from Helpers import *
+from EmBall import Helpers
+from EmBall.Helpers import *
 
-from GameWindow import MainGame
+from EmBall.GameWindow import MainGame
 from optparse import OptionParser
 
 def initParser ():

@@ -12,14 +12,24 @@ import time
 #Debug constants
 DEBUG = False
 
-MAIN_DIR = dirname(dirname(dirname(os.path.abspath(__file__))))
+#Directory related voodoo 
+#Since resources such as images are in different places when the app
+#is packaged than when it's in a module, we provide some hacky ways to update the 
+#location of the di
+#relative to a main directory. 
 
-LOG_DIR = os.path.join(MAIN_DIR, "log")
+def set_dirs_relative(main_dir):
+    """Sets all dir variables to their appropriate location relative to main_dir"""
+    global MAIN_DIR, IMG_DIR, LOG_DIR
+    
+    MAIN_DIR = main_dir
+    IMG_DIR = os.path.join(main_dir, "Images")
+    LOG_DIR = os.path.join(main_dir, "log")
+
+#This assignment will probably get overridden
+set_dirs_relative(dirname(dirname(dirname(os.path.abspath(__file__)))))
+
 LOG_FILE = None
-#Image Utilities
-
-IMG_DIR = os.path.join(MAIN_DIR, "Images")
-
 IMG_FILES = {"ball" :  "ball.png",
             "paddle" : "paddle.png",
             "blue" : "Blocks/blue.png",
@@ -28,8 +38,8 @@ IMG_FILES = {"ball" :  "ball.png",
             "startBackground" : "Backgrounds/bricks.png" 
 }
 
-#File helpers:
 
+#File helpers:
 def get_path_for_level(levelName):
     levelsDir = os.path.join(MAIN_DIR, "Levels")
     path = os.path.join(levelsDir, levelName)

@@ -7,20 +7,15 @@ Usage:
 
 from setuptools import setup
 
-APP = ["src/EmBall/EmBall.py"]
+APP = ['EmBall.py']
 DATA_FILES = []
-OPTIONS = {'argv_emulation': True}
+OPTIONS = {'argv_emulation': True,
+ 'packages': 'EmBall',
+ 'resources': 'Images,doc,Levels'}
 
 setup(
-    #Metadata
-    name="EmBall",
-    author="Andrew Mains",
-    author_email="andrewmains12@berkeley.edu",
-
-    #Real data
     app=APP,
     data_files=DATA_FILES,
     options={'py2app': OPTIONS},
     setup_requires=['py2app'],
-    install_requires=['pygame']
 )

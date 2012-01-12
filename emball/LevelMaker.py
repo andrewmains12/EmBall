@@ -96,7 +96,7 @@ class LevelMaker (GameWindow):
         self.all.add(block)
         self.item_following_cursor.add(block)
         
-        self.screen.fill(block
+#        self.screen.fill(block
         
     def save (self):
         print ("Saved, in theory")
