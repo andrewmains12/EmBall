@@ -25,7 +25,7 @@ IMG_FILES = {"ball" :  "ball.png",
             "blue" : "Blocks/blue.png",
             "red"  : "Blocks/red.png",
             "unbreakable" : "Blocks/unbreakable.png",
-            "startBackground" : "Backgrounds/bricks.jpg" 
+            "startBackground" : "Backgrounds/bricks.png" 
 }
 
 #File helpers:
