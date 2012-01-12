@@ -1,0 +1,4 @@
+#!/bin/bash
+py2applet --make-setup --packages=emball --resources="Images,doc,Levels" EmBall.py
+python setup.py py2app
+cp numpy_init  dist/EmBall.app/Contents/Resources/lib/python2.7/numpy/core/__init__.py
