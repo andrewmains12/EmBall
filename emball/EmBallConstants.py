@@ -1,7 +1,6 @@
 import pygame
-
-"""Sole purpose of this module is to contain the constants used by other 
-modules--it has no methods defined, only data attributes"""
+from pygame.locals import USEREVENT
+"""Contains the constants used by other modules"""
 
 
 #Physical Constants
@@ -36,7 +35,9 @@ DEFAULTFONTSIZE = 40
 FONTCOLOR = 'black'
 
 #EmBall event constants
-BALLDROP = 25
+BALLDROP = USEREVENT + 1
+
+
 
 #Messages
 WIN_LOSS_MESSAGES = {

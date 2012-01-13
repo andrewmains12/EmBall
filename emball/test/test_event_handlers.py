@@ -29,13 +29,13 @@ class EventHandlerTest(unittest.TestCase):
         
     def test_auto_discover_handlers (self):
         """Test that on_mousebuttondown was successfully discovered and registered""" 
-        def on_mousebuttondown(self, event, **kwargs):
+        def on_MOUSEBUTTONDOWN(self, event, **kwargs):
             pass
         
-        self.game_window.on_mousebuttondown = on_mousebuttondown
+        self.game_window.on_MOUSEBUTTONDOWN = on_MOUSEBUTTONDOWN
         self.game_window.auto_discover_handlers()
         self.assertEqual(self.game_window.event_handlers[MOUSEBUTTONDOWN],
-                         self.game_window.on_mousebuttondown)
+                         self.game_window.on_MOUSEBUTTONDOWN)
 
     def test_auto_discover_handlers_error (self):
         """Check for an appropriate exception when auto-registering a bad event

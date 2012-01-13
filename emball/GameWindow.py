@@ -9,6 +9,7 @@ import pygame
 from pygame.locals import *
 
 #EmBall imports
+from EventHandlers import EventHandlerDict
 from level import Level, load_level
 import Helpers
 from Helpers import *
@@ -38,7 +39,7 @@ class GameWindow (object):
            
            These attributes will be taken from enclosing_game_window if provided
         """        
-        self.event_handlers = {}
+        self.event_handlers = EventHandlerDict()
         self.auto_discover_handlers()
         if not enclosing_game_window:
             #Need to do pygame initialization if this is the first window
@@ -70,12 +71,12 @@ class GameWindow (object):
         for name in dir(self):
             m = re.match(GameWindow.EVENT_PATTERN, name)                            
             if m:
-                event_name = m.groups()[0].upper()
+                event_name = m.groups()[0]
                 try:
                     self.registerEvent(eval(event_name), 
                                        getattr(self, name))
                 except NameError:
-                    raise InitializationError("No pygame event by name of " \
+                    raise InitializationError("No pygame.event.type or function " \
                                                   + event_name)
     
     def addEventHandlers(self, *event_handlers):
@@ -97,23 +98,35 @@ class GameWindow (object):
         for event, handler in event_handlers:
             self.registerEvent(event, handler)
 
-    def registerEvent (self, event_type, handler):
+    def registerEvent (self, event_test_or_type, handler):
         """Registers handler with event
         
-        event_type: A pygame event type constant defined in pygame.locals
+        event_test_or_type: One of: 
+                              A pygame event type constant defined in pygame.locals
+                              A function taking in an event and returning a boolean
         handler: A function or bound method taking in an event and a dictionary of 
         arguments 
         """
-        self.event_handlers[event_type] = handler
+        self.event_handlers[event_test_or_type] = handler
 
     def handleEvents(self, **args):
         """Checks for registered events and calls the appropriate handler
         
         Events are processed in order of registration.
         """
+
         for event in pygame.event.get():
-            if event.type in self.event_handlers:
-                self.event_handlers[event.type](event, **args)
+            if event in self.event_handlers:
+                self.event_handlers[event](event, **args)
+
+    ########################################
+    # Event Handlers
+    ########################################
+
+    def on_QUIT (self, event, **kwargs):
+        """Run postgame cleanup upon receiving QUIT"""
+        pygame.quit()
+        sys.exit(0)
 
 class MainGame(GameWindow):
     """Game loop for mainscreen"""
@@ -146,18 +159,13 @@ class MainGame(GameWindow):
     ######################################
     #Event handlers
     ######################################
-    def on_mousebuttondown (self, event, **kwargs):
+    def on_MOUSEBUTTONDOWN (self, event, **kwargs):
         """Starts main game if the mouse is clicking the startbutton"""        
         mousePos = pygame.mouse.get_pos()                    
-
         if self.startButton.rect.collidepoint(mousePos):
             #If hit start button:
             self.runGame(self.startLevel)
 
-    def on_quit (self, event, **kwargs):
-        """Run postgame cleanup upon receiving QUIT"""
-        pygame.quit()
-        sys.exit(0)
         
     def gameLoop(self):
         while True:
@@ -234,7 +242,10 @@ class Game (GameWindow):
                 self.ball.blockBounce(block)                
                 block.hit()
 
-    def handleDrop(self):
+    ##########################################################
+    # Event handlers
+    ##########################################################
+    def on_BALLDROP(self, event, **kwargs):
         #Lose life
         self.lives = self.lives - 1
         
@@ -250,6 +261,9 @@ class Game (GameWindow):
             pygame.time.wait(500)
             texts.clear(self.screen, self.background)
             
+
+    def on_isConsoleEscape (self, event, **kwargs):
+        import pdb; pdb.set_trace()
 
     def movePaddle (self):
         """Moves the paddle based on the input from the arrow keys"""
@@ -331,28 +345,17 @@ Paddle: pos = %(paddleP)s" % \
     def clearScreen (self):
         self.all.clear (self.screen, self.background)
 
-
+    def handleEvents(self):
+        super(Game, self).handleEvents()
 #################################################
 # Game loops
 #################################################
 
     def gameLoop(self, *args):
-        """Runs the main game"""
-        
+        """Runs the main game"""        
         while True:
-            for event in pygame.event.get():
-                if event.type == QUIT:
-                    #Repost for outer loop to catch
-                    pygame.event.post(pygame.event.Event(QUIT))
-                    return                
-                elif event.type == BALLDROP:
-                    self.handleDrop()
-
-                #Ctrl-C
-                elif isConsoleEscape (event):
-                    import pdb; pdb.set_trace()
-#                    self.console()
-
+            self.handleEvents()
+                                            
             if self.gameOver():
                 self.endGameLoop()
                 return
