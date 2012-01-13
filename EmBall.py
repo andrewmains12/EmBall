@@ -1,3 +1,4 @@
+#!/usr/bin/env python2.7
 import os
 
 from emball import Helpers
@@ -38,7 +39,7 @@ def main():
         level = "basic"
                       
     MainGame(level).gameLoop()    
-    pygame.quit()
+    
 
 
 

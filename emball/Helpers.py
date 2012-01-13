@@ -27,7 +27,7 @@ def set_dirs_relative(main_dir):
     LOG_DIR = os.path.join("/tmp","EmBall", "log")
 
 #This assignment will probably get overridden
-set_dirs_relative(dirname(dirname(dirname(os.path.abspath(__file__)))))
+set_dirs_relative(dirname(dirname(os.path.abspath(__file__))))
 
 LOG_FILE = None
 IMG_FILES = {"ball" :  "ball.png",

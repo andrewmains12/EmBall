@@ -39,7 +39,7 @@ class GameWindow (object):
            These attributes will be taken from enclosing_game_window if provided
         """        
         self.event_handlers = {}
-        
+        self.auto_discover_handlers()
         if not enclosing_game_window:
             #Need to do pygame initialization if this is the first window
             pygame.init() 
@@ -68,7 +68,7 @@ class GameWindow (object):
         """
 
         for name in dir(self):
-            m = re.match(GameWindow.EVENT_PATTERN, name)            
+            m = re.match(GameWindow.EVENT_PATTERN, name)                            
             if m:
                 event_name = m.groups()[0].upper()
                 try:
@@ -77,13 +77,12 @@ class GameWindow (object):
                 except NameError:
                     raise InitializationError("No pygame event by name of " \
                                                   + event_name)
-
     
     def addEventHandlers(self, *event_handlers):
         
         """Register any event handlers with this GameWindow
         
-        event_handlers: list of event, handler pairs
+        event_handlers: any number of event, handler pairs
 
         Subclasses should call this method in order to register their own events
         with the GameWindow.
@@ -124,8 +123,8 @@ class MainGame(GameWindow):
         self.startLevel = startLevel
         self.background = load_builtin_image("startBackground")
 
-        self.addEventHandlers((QUIT, self.on_quit),
-                              (MOUSEBUTTONDOWN, self.on_mousebuttondown))
+        # self.addEventHandlers((QUIT, self.on_quit),
+        #                       (MOUSEBUTTONDOWN, self.on_mousebuttondown))
         #Init groups
         self.all = pygame.sprite.Group()
         self.buttons = pygame.sprite.Group()

@@ -17,6 +17,9 @@ distribute: dist/EmBall.app
 	tar -cvf $(TAR_FILE) dist/EmBall.app
 	cp $(TAR_FILE) ~/Public/
 
+test:
+	python -m unittest discover --start-directory=./emball
+
 clean:
 	rm setup.py
 	rm -rf build dist

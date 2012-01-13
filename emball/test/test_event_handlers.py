@@ -1,7 +1,8 @@
 import unittest
+from emball.Helpers import InitializationError
 from pygame.locals import *
 
-from emball import GameWindow
+from emball.GameWindow import GameWindow
 
 class MockGameWindow (GameWindow):
     """Class to test event handler autodiscovery"""
@@ -31,7 +32,8 @@ class EventHandlerTest(unittest.TestCase):
         self.assertEqual(self.game_window.event_handlers[QUIT], handler)
         
     def test_auto_discover_handlers (self):
-        """Test that on_quit was successfully discovered and registered"""
+        """Test that on_mousebuttondown was successfully discovered and registered"""
+        self.game_window.auto_discover_handlers()
         self.assertEqual(self.game_window.event_handlers[MOUSEBUTTONDOWN],
                          self.game_window.on_mousebuttondown)
 
@@ -41,7 +43,7 @@ class EventHandlerTest(unittest.TestCase):
         def on_foobar (self, event, **kwargs):
             pass
         self.game_window.on_foobar = on_foobar        
-        self.assertRaises (NameError, self.game_window.auto_discover_handlers)
+        self.assertRaises (InitializationError, self.game_window.auto_discover_handlers)
 
     
-if 
+
