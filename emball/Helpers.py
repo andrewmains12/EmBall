@@ -24,7 +24,7 @@ def set_dirs_relative(main_dir):
     
     MAIN_DIR = main_dir
     IMG_DIR = os.path.join(main_dir, "Images")
-    LOG_DIR = os.path.join(main_dir, "log")
+    LOG_DIR = os.path.join("/tmp","EmBall", "log")
 
 #This assignment will probably get overridden
 set_dirs_relative(dirname(dirname(dirname(os.path.abspath(__file__)))))
@@ -114,9 +114,10 @@ def normalize (vector):
 def debugPrint(x, debug_level=0):
     if DEBUG:
         print (x)
-    
+
     if LOG_FILE != None:
-        os.mkdir(LOG_DIR)
+        if not os.path.exists(LOG_DIR):
+            os.makedirs(LOG_DIR) 
         with open(os.path.join(LOG_DIR, LOG_FILE), 'w') as f: 
             f.write(str(x) + '\n')
             
