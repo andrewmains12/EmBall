@@ -2,9 +2,9 @@ import sys
 sys.path.append("..")
 import unittest
 
-from EmBall import Helpers
+from emball import Helpers
 
-from EmBall.level import Level, elementToDict, safe_decode_json
+from emball.level import Level, elementToDict, safe_decode_json
 
 from MonkeyPatches import HelperPatch
 

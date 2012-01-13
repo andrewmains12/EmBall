@@ -2,7 +2,7 @@
 
 from __future__ import division
 import sys
-
+import re
 
 #Pygame imports
 import pygame
@@ -21,10 +21,16 @@ class GameWindow (object):
     """
     Defines an EmBall window with a screen, clock, etc. 
     
-    Each GameWindow subclass should, at a minimum, implement setupEventHandlers, which
-    registers
-    implement gameLoop, which is responsible for 
-    events handling and the like
+    Each GameWindow subclass should, at a minimum, define event handlers, which will
+    be used by the gameLoop.
+
+    There are two ways of doing this:
+       1. Autodiscovery: Methods matching GameWindow.EVENT_PATTERN will be registered
+       by auto_discover_handlers.
+       
+       2. Manual registration: You can register manually events using addEventHandlers.
+          This allows for more flexibility (handlers can be any callable object)
+                
     """
 
     def __init__ (self, enclosing_game_window=None):
@@ -49,6 +55,28 @@ class GameWindow (object):
             self.screen = enclosing_game_window.screen
             self.clock  = enclosing_game_window.clock
             self.enclosing_game_window = enclosing_game_window
+
+    EVENT_PATTERN = r'^on_(.*)$'
+    def auto_discover_handlers (self):
+        """Find any methods matching EVENT_PATTERN and register them with their event
+                
+        Methods of the form on_<event_name> will be picked up by this method, and
+        registered under event_name.
+
+        event_name must be defined in the global scope (and should correspond to 
+        a valid pygame event as well, though this is not checked here)
+        """
+
+        for name in dir(self):
+            m = re.match(GameWindow.EVENT_PATTERN, name)            
+            if m:
+                event_name = m.groups()[0].upper()
+                try:
+                    self.registerEvent(eval(event_name), 
+                                       getattr(self, name))
+                except NameError:
+                    raise InitializationError("No pygame event by name of " \
+                                                  + event_name)
 
     
     def addEventHandlers(self, *event_handlers):
