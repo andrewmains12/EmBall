@@ -6,14 +6,14 @@ from BaseGameObjects import BaseBlock
 
 class Basic(BaseBlock):
     
-    def __init__ (self, **blockAttrs):
+    def __init__ (self, game_window=None, **blockAttrs):
         blockAttrs['image_names'] = [blockAttrs['color']]
-        BaseBlock.__init__ (self, **blockAttrs)
+        BaseBlock.__init__ (self, game_window=game_window, **blockAttrs)
 
 class UnbreakableBlock (BaseBlock):
     
-    def __init__ (self, **blockAttrs):
-        BaseBlock.__init__ (self, **blockAttrs)
+    def __init__ (self, game_window=None, **blockAttrs):
+        BaseBlock.__init__ (self, game_window=game_window, **blockAttrs)
 
 
 

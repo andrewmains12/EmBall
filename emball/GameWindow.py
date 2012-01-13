@@ -218,30 +218,13 @@ class Game (GameWindow):
             self.blocks.add(block)
             self.all.add(block)
         
-        self.ball = Ball()
-        self.paddle = Paddle()
+        self.ball = Ball(game_window=self)
+        self.paddle = Paddle(game_window=self)
         
         #Init background
         self.background = self.level.background
         self.screen.blit(self.background, (0,0))
-
-    def handleCollisions(self):
-        if (self.paddle.rect.colliderect(self.ball.rect)):
-           
-            self.ball.paddleBounce(self.paddle)
-
-            debugPrint("Hit paddle")
-            debugPrint(str(self) + "\n")
-
-        else:
-            hitBlocks = pygame.sprite.spritecollide \
-                                    (self.ball, self.blocks, False)
-            if len(hitBlocks) != 0:
-            
-                block = hitBlocks[0]
-                self.ball.blockBounce(block)                
-                block.hit()
-
+                    
     ##########################################################
     # Event handlers
     ##########################################################
@@ -250,8 +233,8 @@ class Game (GameWindow):
         self.lives = self.lives - 1
         
         self.ball.kill()
-        self.ball = Ball()
-
+        self.ball = Ball(game_window=self)
+        
         if self.lives != 0:
         #Draw drop message to screen
             dropText = Text(self.messages['drop'])
@@ -261,10 +244,13 @@ class Game (GameWindow):
             pygame.time.wait(500)
             texts.clear(self.screen, self.background)
             
-
+    #def on_PADDLECOLLISION (self, event, **kwargs):
+        
+            
     def on_isConsoleEscape (self, event, **kwargs):
         import pdb; pdb.set_trace()
 
+    
     def movePaddle (self):
         """Moves the paddle based on the input from the arrow keys"""
         keystate = pygame.key.get_pressed()
@@ -362,7 +348,6 @@ Paddle: pos = %(paddleP)s" % \
                                         
             self.clearScreen()
 
-            self.handleCollisions()            
             self.all.update()            
             self.movePaddle()
             self.redrawScreen()       

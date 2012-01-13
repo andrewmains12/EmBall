@@ -16,7 +16,9 @@ class GameObject(pygame.sprite.Sprite):
     """Base object """
     
     containers = None
-    def __init__ (self):
+    def __init__ (self, game_window=None):
+        """Initialize a GameObject with the game in which it is contained"""
+        self.game_window = game_window
         if self.containers is None:    
             raise InitializationError \
               ("Game object initialized without self.containers being defined")        
@@ -24,8 +26,15 @@ class GameObject(pygame.sprite.Sprite):
         self.rect = None
         pygame.sprite.Sprite.__init__(self, self.containers)
         
-
     
+    def hit (self, other_object):
+        """Action to be taken when other_object hits this one"""
+        pass
+    
+    def colliding (self, other_object):
+        return self.rect.colliderect(other_object.rect)
+    
+    #TODO: change these to operate on GameObjects instead of rects
     def topCollision (self, rect):
         """Tests whether top of sprite is colliding with rect"""
         for x in range(self.rect.left, self.rect.right, COLLISIONSTEP):
@@ -63,12 +72,14 @@ class GameObject(pygame.sprite.Sprite):
 
         return False
 
+
+
 class Ball(GameObject):
     #Class vars
     images = []
     
-    def __init__(self):       
-        GameObject.__init__ (self)
+    def __init__(self, game_window=None):       
+        GameObject.__init__ (self, game_window)
        
         if Ball.images == []:
             Ball.images.append(Helpers.load_builtin_image("ball"))
@@ -80,22 +91,30 @@ class Ball(GameObject):
         self.speed = BALLSPEED
            
 
-    def blockBounce(self,block):
-        xDir, yDir = self.direction
+    def blockBounce(self, direction, blocks):
+        """Determines the new direction after bouncing off any blocks"""
+        hitBlocks = pygame.sprite.spritecollide(self, blocks, False)
+            
+        if len(hitBlocks) == 0:            
+            return direction
+    
+        block = hitBlocks[0]        
+        block.hit(self)        
+        xDir, yDir = direction
         
         if block.leftCollision(self.rect) or block.rightCollision(self.rect):
             xDir = -xDir        
         if block.topCollision(self.rect) or block.bottomCollision(self.rect):
             yDir = -yDir
 
-        self.direction = xDir, yDir
-
-    def wallbounce(self):
+        return xDir, yDir
+    
+    def wallBounce(self, direction):
         """
         Simulates a reflection off the walls of the game. Collisions are elastic
         """
 
-        xDir, yDir = self.direction
+        xDir, yDir = direction
         #Bounce off of side walls
         if self.rect.left < SCREENRECT.left \
            or self.rect.right > SCREENRECT.right:
@@ -105,15 +124,18 @@ class Ball(GameObject):
         if self.rect.top < SCREENRECT.top: 
           yDir = -yDir
     
-        self.direction = xDir, yDir
+        return xDir, yDir
 
-    def paddleBounce(self, paddle):
+    def paddleBounce(self, direction, paddle):
         """
         Get new direction after bounce off of paddle. Direction is determined by
         position the ball hits on the paddle relative to the center.       
         """
+        if not self.colliding (paddle):
+            return direction
 
-        xDir,yDir = self.direction
+        paddle.hit(self)
+        xDir,yDir = direction
         
         # Vertical collision
         if paddle.topCollision(self.rect) or paddle.bottomCollision(self.rect): 
@@ -129,33 +151,35 @@ class Ball(GameObject):
             
             xDir = -xDir
 
-           # Normalize x and y
-        
-        self.direction = normalize((xDir,yDir))
+        # Normalize x and y        
+        return normalize((xDir,yDir))
     
-
+    
 
     def update (self):
         if self.rect.bottom > SCREENRECT.bottom:
             pygame.event.post(pygame.event.Event(BALLDROP))
             return
-
-        self.wallbounce()
-        xDir, yDir = self.direction
+                
+        self.direction = xDir, yDir = self.handleCollisions()
         xSpeed, ySpeed = self.speed        
         self.rect.move_ip(xDir * xSpeed, yDir * ySpeed)
         
 
+    def handleCollisions(self):        
+        direction = self.direction
+        direction = self.wallBounce(direction)
+        direction = self.paddleBounce(direction, self.game_window.paddle)
+        direction = self.blockBounce(direction, self.game_window.blocks)
+        
+        return direction
+        
+        
 class Paddle (GameObject):
 
-    def __init__ (self):
-        """Precondition: Paddle.containers must be defined"""
-        try:
-            pygame.sprite.Sprite.__init__(self, self.containers)
-        except AttributeError:
-            raise InitializationError \
-              ("Game object initialized without self.containers being defined")
-        
+    def __init__ (self, game_window=None):
+        """Precondition: Paddle.containers must be defined"""        
+        GameObject.__init__(self, game_window=game_window)
         self.image = Helpers.load_builtin_image("paddle")
         self.rect = self.image.get_rect()
         #Set rect to extend to bottom of screen
@@ -184,6 +208,10 @@ class Paddle (GameObject):
             else: 
                 self.rect.move_ip(xDir * self.speed,0)
 
+    def hit (self, other_object):
+        debugPrint("Hit paddle")
+        debugPrint(str(self.game_window) + "\n")
+
 
 #####################################################
 
@@ -194,9 +222,9 @@ class BaseBlock(GameObject):
     """
     containers = []
 
-    def __init__ (self, **blockAttrs):
+    def __init__ (self, game_window=None, **blockAttrs):
 
-        GameObject.__init__(self)
+        GameObject.__init__(self, game_window)
         
         image_names = blockAttrs['image_names']
         self.images = [Helpers.load_builtin_image(name) for name in image_names]
@@ -204,7 +232,7 @@ class BaseBlock(GameObject):
         self.rect = self.image.get_rect()
         self.rect.topleft = blockAttrs['pos']
         
-    def hit(self):
+    def hit(self, other_object):
         self.kill()
 
 ######################################
