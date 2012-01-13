@@ -37,8 +37,7 @@ def main():
     else: 
         level = "basic"
                       
-    MainGame(level).gameLoop()
-    
+    MainGame(level).gameLoop()    
     pygame.quit()
 
 

@@ -3,6 +3,7 @@
 from __future__ import division
 import sys
 
+
 #Pygame imports
 import pygame
 from pygame.locals import *
@@ -20,7 +21,9 @@ class GameWindow (object):
     """
     Defines an EmBall window with a screen, clock, etc. 
     
-    Each GameWindow subclass should implement gameLoop, which is responsible for 
+    Each GameWindow subclass should, at a minimum, implement setupEventHandlers, which
+    registers
+    implement gameLoop, which is responsible for 
     events handling and the like
     """
 
@@ -28,13 +31,14 @@ class GameWindow (object):
         """Initializes the GameWindow with a screen, clock and so on. 
            
            These attributes will be taken from enclosing_game_window if provided
-        """
-
+        """        
+        self.event_handlers = {}
+        
         if not enclosing_game_window:
             #Need to do pygame initialization if this is the first window
             pygame.init() 
             #Init screen
-            winstyle = 0  # |FULLSCREEN
+            winstyle = 0  
             bestdepth = pygame.display.mode_ok(SCREENRECT.size, winstyle, 32)
             self.screen = pygame.display.set_mode(SCREENRECT.size, 
                                                   winstyle, 
@@ -46,6 +50,44 @@ class GameWindow (object):
             self.clock  = enclosing_game_window.clock
             self.enclosing_game_window = enclosing_game_window
 
+    
+    def addEventHandlers(self, *event_handlers):
+        
+        """Register any event handlers with this GameWindow
+        
+        event_handlers: list of event, handler pairs
+
+        Subclasses should call this method in order to register their own events
+        with the GameWindow.
+
+        Sample usage:
+            
+            self.addEventHandlers ((QUIT, lambda kwargs: sys.exit(0)),
+                                  (MOUSEBUTTONDOWN, self.do_awesome_thing)
+            )
+
+        """
+        for event, handler in event_handlers:
+            self.registerEvent(event, handler)
+
+    def registerEvent (self, event_type, handler):
+        """Registers handler with event
+        
+        event_type: A pygame event type constant defined in pygame.locals
+        handler: A function or bound method taking in an event and a dictionary of 
+        arguments 
+        """
+        self.event_handlers[event_type] = handler
+
+    def handleEvents(self, **args):
+        """Checks for registered events and calls the appropriate handler
+        
+        Events are processed in order of registration.
+        """
+        for event in pygame.event.get():
+            if event.type in self.event_handlers:
+                self.event_handlers[event.type](event, **args)
+
 class MainGame(GameWindow):
     """Game loop for mainscreen"""
     
@@ -54,6 +96,8 @@ class MainGame(GameWindow):
         self.startLevel = startLevel
         self.background = load_builtin_image("startBackground")
 
+        self.addEventHandlers((QUIT, self.on_quit),
+                              (MOUSEBUTTONDOWN, self.on_mousebuttondown))
         #Init groups
         self.all = pygame.sprite.Group()
         self.buttons = pygame.sprite.Group()
@@ -62,33 +106,43 @@ class MainGame(GameWindow):
         #Assign containers
         Button.containers = self.all, self.buttons
         
+        #Register event handlers
+        
         xPos, yPos = SCREENRECT.center
         self.startButton = Button (
                            "START", (xPos, yPos + 50), color='green', 
                                 fontsize=100)
-        self.startButton.add(self.buttons, self.all)
-        
+        self.startButton.add(self.buttons, self.all)        
         self.drawTitleScreen()
-       
+        
+                    
+    ######################################
+    #Event handlers
+    ######################################
+    def on_mousebuttondown (self, event, **kwargs):
+        """Starts main game if the mouse is clicking the startbutton"""        
+        mousePos = pygame.mouse.get_pos()                    
 
+        if self.startButton.rect.collidepoint(mousePos):
+            #If hit start button:
+            self.runGame(self.startLevel)
+
+    def on_quit (self, event, **kwargs):
+        """Run postgame cleanup upon receiving QUIT"""
+        pygame.quit()
+        sys.exit(0)
+        
     def gameLoop(self):
         while True:
-            #Handle events
-            for event in pygame.event.get():
-                if event.type == QUIT:
-                    return
-
-                elif event.type == MOUSEBUTTONDOWN:
-                    mousePos = pygame.mouse.get_pos()                    
-
-                    if self.startButton.rect.collidepoint(mousePos):
-                        #If hit start button:
-                        self.game = Game(self.startLevel, self)
-                        self.game.gameLoop()
-                        self.all.clear(self.screen, self.background)
-                        self.drawTitleScreen()
-                                                            
+            self.handleEvents()                 
             self.clock.tick(80)
+
+    def runGame (self, startLevel):
+        Game(self.startLevel, self).gameLoop()
+        self.all.clear(self.screen, self.background)
+        self.drawTitleScreen()
+                
+        
 
     def drawTitleScreen(self):
         self.all.draw(self.background)

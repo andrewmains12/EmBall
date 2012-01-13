@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.6
+#!/usr/bin/env python
 
 from xml.dom import minidom as xml
 from optparse import OptionParser
@@ -11,7 +11,7 @@ from pygame.locals import *
 
 
 #EmBall imports
-from EmBall import GameWindow
+from GameWindow import GameWindow
 from level import Level
 from Blocks import get_block
 
@@ -42,13 +42,12 @@ class LevelMaker (GameWindow):
         self.screen.blit(self.background, (0,0))
         pygame.display.flip()
 
-    def gameLoop (self):
-        
+    def gameLoop (self):        
         while True:
             for event in pygame.event.get():
                 if event.type == QUIT:
                     return
-
+                
                 elif event.type == MOUSEBUTTONDOWN:
                     self.place_item()
             

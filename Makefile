@@ -9,7 +9,6 @@ setup: $(SRC_FILES)
 
 package: setup.py
 	python setup.py py2app
-	echo
 	echo "Copying patched __init__ file for numpy"
 	cp numpy_init  dist/EmBall.app/Contents/Resources/lib/python2.7/numpy/core/__init__.py
 
